@@ -1,0 +1,687 @@
+{
+  "info": {
+    "name": "Weld - Pruebas de rutas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Rutas de prueba que responden mensajes. POST y PUT usan cuerpos completos; PATCH acepta campos parciales. No se guardan datos ni se autentican usuarios."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Consultar todos - usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra los usuarios\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar por ID - usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra un usuario\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear - usuarios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/usuarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto crea un usuario\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reemplazar - usuarios",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/usuarios/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto reemplaza un usuario\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar parcialmente - usuarios",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/usuarios/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto actualiza parcialmente un usuario\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar - usuarios",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto elimina un usuario\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Consultar todos - productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/productos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra los productos\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar por ID - productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/productos/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra un producto\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear - productos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/productos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5,\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto crea un producto\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reemplazar - productos",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/productos/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5,\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto reemplaza un producto\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar parcialmente - productos",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/productos/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto actualiza parcialmente un producto\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar - productos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/productos/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto elimina un producto\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Consultar todos - pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra los pedidos\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar por ID - pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra un pedido\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear - pedidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/pedidos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"productosIds\": [\n    1,\n    2\n  ],\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto crea un pedido\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reemplazar - pedidos",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/pedidos/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"productosIds\": [\n    1,\n    2\n  ],\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto reemplaza un pedido\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar parcialmente - pedidos",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/pedidos/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto actualiza parcialmente un pedido\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar - pedidos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/pedidos/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto elimina un pedido\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Consultar todos - auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra las autenticaciones\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar por ID - auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto muestra una autenticación\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear - auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto crea una autenticación\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reemplazar - auth",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto reemplaza una autenticación\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar parcialmente - auth",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto actualiza parcialmente una autenticación\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar - auth",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/auth/{{id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estado correcto\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Mensaje esperado\", function () { pm.expect(pm.response.text()).to.eql(\"Esto elimina una autenticación\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
