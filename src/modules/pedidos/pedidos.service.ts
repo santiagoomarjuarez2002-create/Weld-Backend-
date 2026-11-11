@@ -1,26 +1,30 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { CreatePedidoDto } from './dto/create-pedido.dto.js';
 import { UpdatePedidoDto } from './dto/update-pedido.dto.js';
 
 @Injectable()
 export class PedidosService {
-  create(createPedidoDto: CreatePedidoDto) {
-    return 'This action adds a new pedido';
-  }
-
   findAll() {
-    return `This action returns all pedidos`;
+    return 'Esto muestra los pedidos';
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pedido`;
+  findOne(_id: number) {
+    return 'Esto muestra un pedido';
   }
 
-  update(id: number, updatePedidoDto: UpdatePedidoDto) {
-    return `This action updates a #${id} pedido`;
+  create(_dto: CreatePedidoDto) {
+    return 'Esto crea un pedido';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pedido`;
+  replace(_id: number, _dto: CreatePedidoDto) {
+    return 'Esto reemplaza un pedido';
+  }
+
+  update(_id: number, _dto: UpdatePedidoDto) {
+    return 'Esto actualiza parcialmente un pedido';
+  }
+
+  remove(_id: number) {
+    return 'Esto elimina un pedido';
   }
 }

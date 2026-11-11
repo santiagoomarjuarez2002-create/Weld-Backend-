@@ -4,23 +4,27 @@ import { UpdateAuthDto } from './dto/update-auth.dto.js';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
-
   findAll() {
-    return `This action returns all auth`;
+    return 'Esto muestra las autenticaciones';
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  findOne(_id: number) {
+    return 'Esto muestra una autenticación';
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  create(_dto: CreateAuthDto) {
+    return 'Esto crea una autenticación';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  replace(_id: number, _dto: CreateAuthDto) {
+    return 'Esto reemplaza una autenticación';
+  }
+
+  update(_id: number, _dto: UpdateAuthDto) {
+    return 'Esto actualiza parcialmente una autenticación';
+  }
+
+  remove(_id: number) {
+    return 'Esto elimina una autenticación';
   }
 }

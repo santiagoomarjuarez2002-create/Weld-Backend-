@@ -1,26 +1,30 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto.js';
 import { UpdateProductoDto } from './dto/update-producto.dto.js';
 
 @Injectable()
 export class ProductosService {
-  create(createProductoDto: CreateProductoDto) {
-    return 'This action adds a new producto';
-  }
-
   findAll() {
-    return `This action returns all productos`;
+    return 'Esto muestra los productos';
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} producto`;
+  findOne(_id: number) {
+    return 'Esto muestra un producto';
   }
 
-  update(id: number, updateProductoDto: UpdateProductoDto) {
-    return `This action updates a #${id} producto`;
+  create(_dto: CreateProductoDto) {
+    return 'Esto crea un producto';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} producto`;
+  replace(_id: number, _dto: CreateProductoDto) {
+    return 'Esto reemplaza un producto';
+  }
+
+  update(_id: number, _dto: UpdateProductoDto) {
+    return 'Esto actualiza parcialmente un producto';
+  }
+
+  remove(_id: number) {
+    return 'Esto elimina un producto';
   }
 }
