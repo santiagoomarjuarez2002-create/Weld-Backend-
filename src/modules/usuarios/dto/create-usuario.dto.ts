@@ -1,18 +1,50 @@
 ﻿import {
   IsEmail,
   IsNotEmpty,
-  IsOptional,
   IsString,
   IsStrongPassword,
-  Length,
   MaxLength,
 } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsString({ message: 'El nombre debe ser un texto' })
   @IsNotEmpty({ message: 'El nombre no puede estar vacío' })
-  @Length(3, 100, { message: 'El nombre debe tener entre 3 y 100 caracteres' })
+  @MaxLength(100, { message: 'El nombre no puede exceder los 100 caracteres' })
   nombre: string;
+
+  @IsString({ message: 'El apellido debe ser un texto' })
+  @IsNotEmpty({ message: 'El apellido no puede estar vacío' })
+  @MaxLength(100, {
+    message: 'El apellido no puede exceder los 100 caracteres',
+  })
+  apellido: string;
+
+  @IsString({ message: 'El teléfono debe ser un texto' })
+  @IsNotEmpty({ message: 'El teléfono no puede estar vacío' })
+  @MaxLength(15, { message: 'El teléfono no puede exceder los 15 caracteres' })
+  telefono: string;
+
+  @IsString({ message: 'El DNI debe ser un texto' })
+  @IsNotEmpty({ message: 'El DNI no puede estar vacío' })
+  @MaxLength(10, { message: 'El DNI no puede exceder los 10 caracteres' })
+  dni: string;
+
+  @IsString({ message: 'La provincia debe ser un texto' })
+  @IsNotEmpty({ message: 'La provincia no puede estar vacía' })
+  @MaxLength(100, { message: 'La provincia no puede exceder los 100 caracteres' })
+  provincia: string;
+
+  @IsString({ message: 'La localidad debe ser un texto' })
+  @IsNotEmpty({ message: 'La localidad no puede estar vacía' })
+  @MaxLength(100, { message: 'La localidad no puede exceder los 100 caracteres' })
+  localidad: string;
+
+  @IsString({ message: 'La dirección debe ser un texto' })
+  @IsNotEmpty({ message: 'La dirección no puede estar vacía' })
+  @MaxLength(100, {
+    message: 'La dirección no puede exceder los 100 caracteres',
+  })
+  direccion: string;
 
   @IsEmail({}, { message: 'El email debe ser un correo electrónico válido' })
   @MaxLength(254, { message: 'El email no puede exceder los 254 caracteres' })
@@ -36,11 +68,4 @@ export class CreateUsuarioDto {
     },
   )
   password: string;
-
-  @IsOptional()
-  @IsString({ message: 'La dirección debe ser un texto' })
-  @Length(5, 255, {
-    message: 'La dirección debe tener entre 5 y 255 caracteres',
-  })
-  direccion?: string;
 }

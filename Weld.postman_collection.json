@@ -71,7 +71,7 @@
             "url": "{{baseUrl}}/usuarios",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\"\n}",
+              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"apellido\": \"Perez\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\",\n  \"rol\": \"cliente\",\n  \"activo\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -105,7 +105,7 @@
             "url": "{{baseUrl}}/usuarios/{{id}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\"\n}",
+              "raw": "{\n  \"nombre\": \"Joaquin\",\n  \"apellido\": \"Perez\",\n  \"email\": \"joaquin@example.com\",\n  \"password\": \"Clave123!\",\n  \"rol\": \"cliente\",\n  \"activo\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -238,7 +238,7 @@
             "url": "{{baseUrl}}/productos",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5,\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -272,7 +272,7 @@
             "url": "{{baseUrl}}/productos/{{id}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5,\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"nombre\": \"Soldadora\",\n  \"descripcion\": \"Soldadora para uso industrial\",\n  \"precio\": 125.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -405,7 +405,7 @@
             "url": "{{baseUrl}}/pedidos",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"usuarioId\": 1,\n  \"productosIds\": [\n    1,\n    2\n  ],\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"estado\": \"pendiente\",\n  \"direccion_envio\": \"Calle de prueba 101, Buenos Aires\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -439,7 +439,7 @@
             "url": "{{baseUrl}}/pedidos/{{id}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"usuarioId\": 1,\n  \"productosIds\": [\n    1,\n    2\n  ],\n  \"fecha\": \"2020-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"estado\": \"pendiente\",\n  \"direccion_envio\": \"Calle de prueba 101, Buenos Aires\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -473,7 +473,7 @@
             "url": "{{baseUrl}}/pedidos/{{id}}",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"estado\": \"pendiente\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
