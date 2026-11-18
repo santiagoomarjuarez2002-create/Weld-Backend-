@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -6,6 +6,7 @@
   Body,
   Patch,
   Param,
+  ParseIntPipe,
   Delete,
 } from '@nestjs/common';
 import { PedidosService } from './pedidos.service.js';
@@ -14,35 +15,41 @@ import { UpdatePedidoDto } from './dto/update-pedido.dto.js';
 
 @Controller('pedidos')
 export class PedidosController {
-  constructor(private readonly service: PedidosService) {}
+  constructor(private readonly pedidosService: PedidosService) {}
 
   @Get()
   findAll() {
-    return this.service.findAll();
+    return this.pedidosService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.pedidosService.findOne(id);
   }
 
   @Post()
-  create(@Body() dto: CreatePedidoDto) {
-    return this.service.create(dto);
+  create(@Body() createPedidoDto: CreatePedidoDto) {
+    return this.pedidosService.create(createPedidoDto);
   }
 
   @Put(':id')
-  replace(@Param('id') id: string, @Body() dto: CreatePedidoDto) {
-    return this.service.replace(+id, dto);
+  replace(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createPedidoDto: CreatePedidoDto,
+  ) {
+    return this.pedidosService.replace(id, createPedidoDto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePedidoDto) {
-    return this.service.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePedidoDto: UpdatePedidoDto,
+  ) {
+    return this.pedidosService.update(id, updatePedidoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.pedidosService.remove(id);
   }
 }

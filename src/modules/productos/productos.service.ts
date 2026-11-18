@@ -32,13 +32,13 @@ export class ProductosService {
   }
 
   async replace(id: number, dto: CreateProductoDto) {
-  await this.findOne(id);
+    await this.findOne(id);
 
-  return await this.prisma.productos.update({
-    where: { id },
-    data: dto,
-  });
-}
+    return await this.prisma.productos.update({
+      where: { id },
+      data: dto,
+    });
+  }
 
   async remove(id: number) {
     await this.findOne(id);
