@@ -26,17 +26,17 @@ export class PedidosService {
    }
  
  
-   async update(id: number, dto: UpdatePedidoDto) {
+   async update(id: number, updatePedidoDto: UpdatePedidoDto) {
      await this.findOne(id);
-      return this.prisma.pedidos.update({ where: { id }, data: dto });
+      return this.prisma.pedidos.update({ where: { id }, data: updatePedidoDto });
    }
  
-   async replace(id: number, dto: CreatePedidoDto) {
+   async replace(id: number, replacePedidoDto: CreatePedidoDto) {
    await this.findOne(id);
  
    return await this.prisma.pedidos.update({
      where: { id },
-     data: dto,
+     data: replacePedidoDto,
    });
  }
  

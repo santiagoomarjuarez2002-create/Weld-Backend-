@@ -25,18 +25,18 @@ export class DetallePedidosService {
     return detallePedido;
   }
 
-  create(dto: CreateDetallePedidoDto) {
-    return this.prisma.detalles_pedido.create({ data: dto });
+  create(createDetallePedidoDto: CreateDetallePedidoDto) {
+    return this.prisma.detalles_pedido.create({ data: createDetallePedidoDto });
   }
 
-  async update(id: number, dto: UpdateDetallePedidoDto) {
+  async replace(id: number, replaceDetallePedidoDto: CreateDetallePedidoDto) {
     await this.findOne(id);
-    return this.prisma.detalles_pedido.update({ where: { id }, data: dto });
+    return this.prisma.detalles_pedido.update({ where: { id }, data: replaceDetallePedidoDto });
   }
 
-  async replace(id: number, dto: CreateDetallePedidoDto) {
+  async update(id: number, updateDetallePedidoDto: UpdateDetallePedidoDto) {
     await this.findOne(id);
-    return this.prisma.detalles_pedido.update({ where: { id }, data: dto });
+    return this.prisma.detalles_pedido.update({ where: { id }, data: updateDetallePedidoDto });
   }
 
   async remove(id: number) {
