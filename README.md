@@ -30,7 +30,7 @@ npx prisma migrate deploy --config prisma7.config.ts
 npm run start:dev
 ```
 
-El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3000`; se puede cambiar el puerto con `PORT`.
+El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3000`; se puede cambiar el puerto definiendo `PORT` en el entorno.
 
 En PowerShell, por ejemplo:
 
@@ -173,6 +173,8 @@ Los IDs y la cantidad deben ser enteros positivos, el talle debe ser `S`, `M`, `
 | `npm run test:e2e` | Ejecutar pruebas e2e con Vitest |
 | `npm run test:cov` | Ejecutar pruebas con cobertura |
 
+
+
 ## Colección de Postman
 
 El archivo `Weld.postman_collection.json` todavía contiene solicitudes y respuestas de una versión anterior basada en mensajes de prueba. No está sincronizado con los DTOs, la persistencia ni las rutas de autenticación actuales; verificar o actualizar sus ejemplos antes de usarla para probar esta versión.
@@ -195,7 +197,6 @@ prisma/
 |-- schema.prisma
 `-- migrations/
 ```
-
 ## Integrantes
 
 - Joaquin Bernardo
