@@ -1,198 +1,204 @@
 # Weld Backend
 
-API REST de Weld desarrollada con NestJS y TypeScript. Incluye Usuarios, Productos, Pedidos y Auth, y las validaciones del **TP 10: DTO y validación de datos en NestJS**.
+API REST para Weld, construida con NestJS, TypeScript, Prisma 7 y PostgreSQL. Actualmente incluye gestión de usuarios, productos, pedidos y detalles de pedido, además de registro e inicio de sesión con JWT. La versión declarada en `package.json` es `0.0.1`.
 
-## Estado del proyecto
+## Requisitos
 
-- Usuarios, Productos y Pedidos tienen DTOs propios de creación con validaciones y mensajes en español.
-- Los DTOs de actualización heredan las reglas mediante `PartialType`, con campos opcionales.
-- `main.ts` registra un `ValidationPipe` global.
-- Los servicios devuelven mensajes cortos, como “Esto crea un usuario”. Todavía no guardan, consultan ni eliminan datos reales.
-- Auth conserva las rutas de prueba y DTOs vacíos. Sus campos, validaciones y autenticación se trabajarán con la profesora.
-- Se realizaron pruebas en Postman con solicitudes válidas e inválidas.
+- Node.js y npm.
+- PostgreSQL y una base de datos creada para el proyecto.
+- Las variables de entorno `DATABASE_URL` y `JWT_SECRET`.
 
-## Instalación y ejecución
+## Configuración y ejecución
 
-Requisitos: Node.js compatible con las dependencias y npm.
-
-Desde la carpeta `Weld-Backend-`, donde está `package.json`:
+Desde la carpeta que contiene `package.json`:
 
 ```bash
 npm install
+```
+
+Configurar las variables en un archivo `.env` en esa carpeta:
+
+```env
+DATABASE_URL="postgresql://USUARIO:CONTRASENA@localhost:5432/weld?schema=public"
+JWT_SECRET="reemplazar-por-un-secreto-seguro"
+```
+
+Aplicar las migraciones existentes y ejecutar la API:
+
+```bash
+npx prisma migrate deploy --config prisma7.config.ts
 npm run start:dev
 ```
 
-La aplicación escucha en **http://localhost:3000** por defecto. Usa `process.env.PORT` si esa variable está definida en el proceso.
+El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3000`; se puede cambiar el puerto con `PORT`.
 
-Actualmente no se carga automáticamente un archivo `.env`. Para cambiar el puerto desde PowerShell:
+En PowerShell, por ejemplo:
 
 ```powershell
 $env:PORT = '4001'
 npm run start:dev
 ```
 
-Las variables `VITE_API_*` son direcciones que puede utilizar el frontend; no configuran el puerto del backend. Postman tampoco las importa automáticamente desde el `.env`.
+## Persistencia y validación
+
+- Prisma conecta a PostgreSQL mediante `DATABASE_URL`. La aplicación requiere esta variable y `JWT_SECRET` para iniciar.
+- El esquema define `usuarios`, `productos`, `pedidos` y `detalles_pedido`; los pedidos se relacionan con usuarios y sus detalles con productos.
+- Las contraseñas se guardan como hash y no se incluyen en las respuestas de usuarios.
+- `main.ts` registra un `ValidationPipe` global. Los DTOs de creación validan los campos y los DTOs de actualización permiten campos parciales.
+- Los IDs de ruta se validan como enteros. Las operaciones sobre registros inexistentes responden con error 404; el email duplicado y la eliminación de usuarios con pedidos relacionados responden con error 409.
+- El login emite un JWT con vigencia de una hora. En el estado actual no hay guards que exijan el token para acceder a las rutas de gestión.
+
+## Endpoints
+
+Base URL local: `http://localhost:3000`
+
+| Recurso | Rutas |
+| --- | --- |
+| Usuarios | `/usuarios` |
+| Productos | `/productos` |
+| Pedidos | `/pedidos` |
+| Detalles de pedido | `/detalle-pedidos` |
+| Autenticación | `/auth/register`, `/auth/login` |
+
+Usuarios, productos, pedidos y detalles de pedido ofrecen las operaciones CRUD:
+
+| Método | Ruta | Operación |
+| --- | --- | --- |
+| GET | `/recurso` | Listar |
+| GET | `/recurso/:id` | Consultar por ID |
+| POST | `/recurso` | Crear |
+| PUT | `/recurso/:id` | Reemplazar con un cuerpo completo |
+| PATCH | `/recurso/:id` | Actualizar campos enviados |
+| DELETE | `/recurso/:id` | Eliminar |
+
+`GET /` responde `Hola Programacion`. Las respuestas de CRUD contienen los registros de la base de datos. El registro responde con los datos del usuario creado, sin su hash de contraseña; el login responde con `access_token` y los datos públicos del usuario.
+
+## Ejemplos de solicitudes
+
+Enviar los cuerpos como JSON (`Content-Type: application/json`). Las rutas CRUD con `:id` esperan el ID numérico del registro.
+
+### Registrar usuario
+
+`POST /auth/register`  
+`POST /usuarios` acepta el mismo cuerpo.
+
+```json
+{
+  "nombre": "Joaquin",
+  "apellido": "Perez",
+  "telefono": "1122334455",
+  "dni": "12345678",
+  "provincia": "Buenos Aires",
+  "localidad": "La Plata",
+  "direccion": "Calle 123",
+  "email": "joaquin@example.com",
+  "password": "Clave123!"
+}
+```
+
+Los campos son obligatorios. El email debe ser válido y tener hasta 254 caracteres; la contraseña debe tener entre 8 y 128 caracteres, con al menos una minúscula, una mayúscula, un número y un símbolo. Los demás campos son texto y deben respetar los máximos definidos por el esquema: nombre, apellido, provincia y localidad 100 caracteres; teléfono 15; DNI 10; dirección 100.
+
+### Iniciar sesión
+
+`POST /auth/login`
+
+```json
+{
+  "email": "joaquin@example.com",
+  "password": "Clave123!"
+}
+```
+
+Si las credenciales son válidas, la respuesta incluye un JWT con vencimiento de una hora. Las credenciales incorrectas responden `401 Unauthorized`.
+
+### Crear producto
+
+`POST /productos`
+
+```json
+{
+  "nombre": "Remera Weld",
+  "descripcion": "Remera de algodón para uso diario",
+  "precio": 12500.5,
+  "stock_s": 10,
+  "stock_m": 12,
+  "stock_l": 8,
+  "stock_xl": 4
+}
+```
+
+El nombre debe tener entre 3 y 150 caracteres; la descripción, entre 15 y 255. El precio debe ser positivo y tener hasta dos decimales. Los cuatro stocks son enteros no negativos.
+
+### Crear pedido
+
+`POST /pedidos`
+
+```json
+{
+  "usuario_id": 1,
+  "direccion_envio": "Calle 123, La Plata",
+  "costo_envio": 1500
+}
+```
+
+`usuario_id` debe ser un entero positivo correspondiente a un usuario existente. La dirección es obligatoria y admite hasta 255 caracteres; el costo de envío debe ser un número no negativo con hasta dos decimales.
+
+### Crear detalle de pedido
+
+`POST /detalle-pedidos`
+
+```json
+{
+  "pedido_id": 1,
+  "producto_id": 1,
+  "cantidad": 2,
+  "talle": "M",
+  "precio_unitario": 12500.5
+}
+```
+
+Los IDs y la cantidad deben ser enteros positivos, el talle debe ser `S`, `M`, `L` o `XL`, y el precio unitario debe ser positivo con hasta dos decimales.
+
+## Comandos
+
+| Comando | Uso |
+| --- | --- |
+| `npm run start:dev` | Ejecutar en desarrollo con recarga |
+| `npm start` | Ejecutar con Nest CLI |
+| `npm run start:prod` | Ejecutar desde `dist` |
+| `npm run build` | Generar el cliente Prisma y compilar |
+| `npm run prisma:generate` | Generar el cliente Prisma |
+| `npm run lint` | Analizar el código |
+| `npm test` | Ejecutar pruebas unitarias con Vitest |
+| `npm run test:e2e` | Ejecutar pruebas e2e con Vitest |
+| `npm run test:cov` | Ejecutar pruebas con cobertura |
+
+## Colección de Postman
+
+El archivo `Weld.postman_collection.json` todavía contiene solicitudes y respuestas de una versión anterior basada en mensajes de prueba. No está sincronizado con los DTOs, la persistencia ni las rutas de autenticación actuales; verificar o actualizar sus ejemplos antes de usarla para probar esta versión.
 
 ## Estructura principal
 
 ```text
 src/
 |-- main.ts
-`-- modules/
-    |-- App/
-    |-- auth/
-    |-- pedidos/
-    |-- productos/
-    |-- usuarios/
-    `-- ejercicios.ts
+|-- prisma/
+|-- modules/
+|   |-- App/
+|   |-- auth/
+|   |-- pedidos/
+|   |   `-- detalle-pedidos/
+|   |-- productos/
+|   `-- usuarios/
+`-- generated/prisma/
+prisma/
+|-- schema.prisma
+`-- migrations/
 ```
-
-Cada recurso tiene su controlador, servicio, módulo, carpeta `dto` y carpeta `entities`. No hay prefijo global en las rutas.
-
-## Endpoints
-
-| Módulo | URL base |
-| --- | --- |
-| Usuarios | `http://localhost:3000/usuarios` |
-| Productos | `http://localhost:3000/productos` |
-| Pedidos | `http://localhost:3000/pedidos` |
-| Auth | `http://localhost:3000/auth` |
-
-Todos tienen las siguientes rutas. Reemplazar `recurso` por `usuarios`, `productos`, `pedidos` o `auth`:
-
-| Método | Ruta | Operación | Ejemplo de respuesta en Usuarios |
-| --- | --- | --- | --- |
-| GET | `/recurso` | findAll | Esto muestra los usuarios |
-| GET | `/recurso/1` | findOne | Esto muestra un usuario |
-| POST | `/recurso` | create | Esto crea un usuario |
-| PUT | `/recurso/1` | replace | Esto reemplaza un usuario |
-| PATCH | `/recurso/1` | update | Esto actualiza parcialmente un usuario |
-| DELETE | `/recurso/1` | remove | Esto elimina un usuario |
-
-El ID `1` es un ejemplo. Las rutas actuales no verifican su existencia en una base de datos. Auth también devuelve únicamente mensajes; no implementa login.
-
-`GET /` devuelve `Hola Programacion`.
-
-## Probar en Postman
-
-Elegir el método y pegar la URL completa. GET y DELETE no necesitan Body.
-
-Para **POST y PUT**, seleccionar **Body → raw → JSON** y enviar todos los campos obligatorios del recurso. PUT requiere un ID al final de la URL, por ejemplo `http://localhost:3000/usuarios/1`.
-
-### Usuarios
-
-POST: `http://localhost:3000/usuarios`
-
-PUT: `http://localhost:3000/usuarios/1`
-
-```json
-{
-  "nombre": "Joaquin",
-  "email": "joaquin@example.com",
-  "password": "Clave123!"
-}
-```
-
-Validaciones: nombre de 3 a 100 caracteres, email válido de hasta 254 caracteres y contraseña de 8 a 128 caracteres con minúscula, mayúscula, número y símbolo. `direccion` es opcional y debe tener entre 5 y 255 caracteres.
-
-### Productos
-
-POST: `http://localhost:3000/productos`
-
-PUT: `http://localhost:3000/productos/1`
-
-```json
-{
-  "nombre": "Soldadora",
-  "descripcion": "Soldadora para uso industrial",
-  "precio": 125.50,
-  "fecha": "2020-01-01T00:00:00.000Z"
-}
-```
-
-Validaciones: nombre de 3 a 100 caracteres, descripción de 15 a 255, precio numérico positivo con hasta 2 decimales y fecha válida que no sea futura. La fecha se convierte mediante `@Type(() => Date)`.
-
-### Pedidos
-
-POST: `http://localhost:3000/pedidos`
-
-PUT: `http://localhost:3000/pedidos/1`
-
-```json
-{
-  "usuarioId": 1,
-  "productosIds": [1, 2],
-  "fecha": "2020-01-01T00:00:00.000Z"
-}
-```
-
-Validaciones: `usuarioId` entero positivo, `productosIds` como arreglo no vacío de enteros positivos sin duplicados y fecha válida que no sea futura. `observaciones` es opcional, de tipo texto y con hasta 500 caracteres.
-
-### PATCH y Auth
-
-PATCH permite enviar campos parciales en **Body → raw → JSON**. Por ejemplo, para `PATCH http://localhost:3000/productos/1`:
-
-```json
-{
-  "precio": 150.75
-}
-```
-
-Para las rutas POST, PUT y PATCH de Auth, enviar `{}` mientras sus DTOs estén vacíos.
-
-### Comprobar los errores de validación
-
-1. Enviar un POST con el cuerpo válido del recurso: debe responder **201 Created** y el mensaje correspondiente.
-2. Cambiar un solo dato y volver a enviar.
-3. Comprobar la respuesta **400 Bad Request** y los errores del arreglo `message`.
-4. Corregir el dato y comprobar que vuelve a responder **201**.
-
-Ejemplos de errores:
-
-| Recurso | Cambio | Validación |
-| --- | --- | --- |
-| Usuarios | Omitir `email` | Correo obligatorio y válido |
-| Usuarios | Enviar `"password": "123"` | Contraseña fuerte |
-| Productos | Omitir `precio` | Precio obligatorio |
-| Productos | Enviar `"precio": "hola"` | Tipo numérico |
-| Productos | Enviar `"precio": -10` | Precio positivo |
-| Pedidos | Enviar `"usuarioId": "hola"` | Entero positivo |
-| Pedidos | Enviar `"productosIds": []` | Arreglo no vacío |
-| Pedidos | Enviar `"productosIds": [1, 1]` | Identificadores únicos |
-
-Puede aparecer más de un mensaje por campo inválido. Los DTOs actuales no contienen un campo `estado`; la validación de booleanos es un ejemplo de la consigna.
-
-Las solicitudes válidas GET, PUT, PATCH y DELETE responden **200 OK**.
-
-### Colección lista para importar
-
-En Postman, seleccionar **Import** y abrir [Weld.postman_collection.json](./Weld.postman_collection.json).
-
-Incluye las 24 solicitudes de los cuatro módulos, cuerpos de ejemplo y comprobaciones de estado y mensaje. Utiliza `baseUrl=http://localhost:3000` e `id=1` como variables de colección.
-
-## Comandos
-
-| Comando | Uso |
-| --- | --- |
-| `npm run start:dev` | Ejecutar en desarrollo |
-| `npm start` | Iniciar con Nest CLI |
-| `npm run build` | Compilar |
-| `npm run lint` | Analizar el código |
-| `npm test` | Ejecutar pruebas con Vitest |
-| `npm run test:e2e` | Ejecutar pruebas de extremo a extremo |
-
-## Trabajo con ramas
-
-- `main`: versión estable.
-- `dev`: integración.
-- `feature/nombre-funcionalidad`: funcionalidades.
-- `fix/nombre-correccion`: correcciones.
-- `refactor/nombre-cambio`: reorganización.
-- `docs/nombre-documentacion`: documentación.
 
 ## Integrantes
 
-Joaquin Bernardo
-Santiago Juarez
-Santiago Acosta
-Leonel Ferrari
+- Joaquin Bernardo
+- Santiago Juarez
+- Santiago Acosta
+- Leonel Ferrari
