@@ -1,30 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDetallePedidoDto } from './dto/create-detalle-pedido.dto.js';
 import { UpdateDetallePedidoDto } from './dto/update-detalle-pedido.dto.js';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 
 @Injectable()
 export class DetallePedidosService {
+  constructor(private readonly prisma: PrismaService) {}
+
   findAll() {
-    return 'Esto muestra los detalles de pedidos';
+    return this.prisma.detalles_pedido.findMany();
   }
 
-  findOne(_id: number) {
-    return 'Esto muestra un detalle de pedido';
+  async findOne(id: number) {
+    const detallePedido = await this.prisma.detalles_pedido.findUnique({
+      where: { id },
+    });
+
+    if (!detallePedido) {
+      throw new NotFoundException(
+        `No existe un detalle de pedido con id ${id}.`,
+      );
+    }
+
+    return detallePedido;
   }
 
-  create(_dto: CreateDetallePedidoDto) {
-    return 'Esto crea un detalle de pedido';
+  create(createDetallePedidoDto: CreateDetallePedidoDto) {
+    return this.prisma.detalles_pedido.create({ data: createDetallePedidoDto });
   }
 
-  replace(_id: number, _dto: CreateDetallePedidoDto) {
-    return 'Esto reemplaza un detalle de pedido';
+  async replace(id: number, replaceDetallePedidoDto: CreateDetallePedidoDto) {
+    await this.findOne(id);
+    return this.prisma.detalles_pedido.update({ where: { id }, data: replaceDetallePedidoDto });
   }
 
-  update(_id: number, _dto: UpdateDetallePedidoDto) {
-    return 'Esto actualiza parcialmente un detalle de pedido';
+  async update(id: number, updateDetallePedidoDto: UpdateDetallePedidoDto) {
+    await this.findOne(id);
+    return this.prisma.detalles_pedido.update({ where: { id }, data: updateDetallePedidoDto });
   }
 
-  remove(_id: number) {
-    return 'Esto elimina un detalle de pedido';
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.detalles_pedido.delete({ where: { id } });
   }
 }

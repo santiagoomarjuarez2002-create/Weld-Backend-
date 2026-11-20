@@ -6,6 +6,14 @@ import {
 } from 'class-validator';
 
 export class CreateDetallePedidoDto {
+  @IsInt({ message: 'El id del pedido debe ser un número entero' })
+  @IsPositive({ message: 'El id del pedido debe ser mayor que cero' })
+  pedido_id: number;
+
+  @IsInt({ message: 'El id del producto debe ser un número entero' })
+  @IsPositive({ message: 'El id del producto debe ser mayor que cero' })
+  producto_id: number;
+
   @IsInt({ message: 'La cantidad debe ser un número entero' })
   @IsPositive({ message: 'La cantidad debe ser mayor que cero' })
   cantidad: number;
