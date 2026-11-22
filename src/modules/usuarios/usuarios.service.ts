@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -18,6 +19,10 @@ export class UsuariosService {
   }
 
   async findOne(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('El id debe ser un entero positivo.');
+    }
+
     const usuario = await this.prisma.usuarios.findUnique({
       where: { id },
       omit: { password_hash: true },
@@ -78,6 +83,10 @@ export class UsuariosService {
   }
 
   async remove(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('El id debe ser un entero positivo.');
+    }
+
     try {
       return await this.prisma.usuarios.delete({
         where: { id },
@@ -90,15 +99,15 @@ export class UsuariosService {
 
   private handleWriteError(error: unknown, id?: number): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2003') {
-        throw new ConflictException(
-          'La operación entra en conflicto con registros relacionados.',
-        );
-      }
-
       if (error.code === 'P2002') {
         throw new ConflictException(
           'Ya existe una cuenta con ese correo electrónico.',
+        );
+      }
+
+      if (error.code === 'P2003') {
+        throw new ConflictException(
+          'La operación entra en conflicto con registros relacionados.',
         );
       }
 
