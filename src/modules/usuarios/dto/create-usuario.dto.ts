@@ -14,9 +14,7 @@ export class CreateUsuarioDto {
 
   @IsString({ message: 'El apellido debe ser un texto' })
   @IsNotEmpty({ message: 'El apellido no puede estar vacío' })
-  @MaxLength(100, {
-    message: 'El apellido no puede exceder los 100 caracteres',
-  })
+  @MaxLength(100, {message: 'El apellido no puede exceder los 100 caracteres'})
   apellido: string;
 
   @IsString({ message: 'El teléfono debe ser un texto' })
@@ -41,9 +39,7 @@ export class CreateUsuarioDto {
 
   @IsString({ message: 'La dirección debe ser un texto' })
   @IsNotEmpty({ message: 'La dirección no puede estar vacía' })
-  @MaxLength(100, {
-    message: 'La dirección no puede exceder los 100 caracteres',
-  })
+  @MaxLength(100, {message: 'La dirección no puede exceder los 100 caracteres',})
   direccion: string;
 
   @IsEmail({}, { message: 'El email debe ser un correo electrónico válido' })
@@ -51,9 +47,7 @@ export class CreateUsuarioDto {
   email: string;
 
   @IsString({ message: 'La contraseña debe ser un texto' })
-  @MaxLength(128, {
-    message: 'La contraseña no puede exceder los 128 caracteres',
-  })
+  @MaxLength(128, {message: 'La contraseña no puede exceder los 128 caracteres'})
   @IsStrongPassword(
     {
       minLength: 8,

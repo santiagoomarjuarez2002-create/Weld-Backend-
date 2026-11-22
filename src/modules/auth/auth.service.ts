@@ -1,5 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { UsuariosService } from '../usuarios/usuarios.service.js';
 import { LoginAuthDto } from './dto/login-auth.dto.js';
@@ -14,8 +19,16 @@ export class AuthService {
     private readonly usuariosService: UsuariosService,
   ) {}
 
-  register(registerAuthDto: RegisterAuthDto) {
-    return this.usuariosService.create(registerAuthDto);
+  async register(registerAuthDto: RegisterAuthDto) {
+    try {
+      return await this.usuariosService.create(registerAuthDto);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        throw new BadRequestException('Los datos del registro son inválidos.');
+      }
+
+      throw error;
+    }
   }
 
   async login(loginAuthDto: LoginAuthDto) {

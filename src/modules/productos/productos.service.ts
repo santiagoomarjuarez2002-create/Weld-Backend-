@@ -1,4 +1,10 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client.js';
 import { CreateProductoDto } from './dto/create-producto.dto.js';
 import { UpdateProductoDto } from './dto/update-producto.dto.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -12,9 +18,13 @@ export class ProductosService {
   }
 
   async findOne(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('El id debe ser un entero positivo.');
+    }
+
     const producto = await this.prisma.productos.findUnique({ where: { id } });
 
-      if (!producto) {
+    if (!producto) {
       throw new NotFoundException(`No existe un producto con id ${id}.`);
     }
 
@@ -22,26 +32,64 @@ export class ProductosService {
   }
 
   async create(createProductoDto: CreateProductoDto) {
-    return this.prisma.productos.create({ data: createProductoDto });
+    try {
+      return await this.prisma.productos.create({ data: createProductoDto });
+    } catch (error) {
+      this.handleWriteError(error);
+    }
   }
-
 
   async update(id: number, updateProductoDto: UpdateProductoDto) {
     await this.findOne(id);
-     return this.prisma.productos.update({ where: { id }, data: updateProductoDto });
+    try {
+      return await this.prisma.productos.update({
+        where: { id },
+        data: updateProductoDto,
+      });
+    } catch (error) {
+      this.handleWriteError(error, id);
+    }
   }
 
   async replace(id: number, replaceProductoDto: CreateProductoDto) {
-  await this.findOne(id);
+    await this.findOne(id);
 
-  return await this.prisma.productos.update({
-    where: { id },
-    data: replaceProductoDto,
-  });
-}
+    try {
+      return await this.prisma.productos.update({
+        where: { id },
+        data: replaceProductoDto,
+      });
+    } catch (error) {
+      this.handleWriteError(error, id);
+    }
+  }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.productos.delete({ where: { id } });
+    try {
+      return await this.prisma.productos.delete({ where: { id } });
+    } catch (error) {
+      this.handleWriteError(error, id);
+    }
+  }
+
+  private handleWriteError(error: unknown, id?: number): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Ya existe un registro con esos datos.');
+      }
+
+      if (error.code === 'P2003') {
+        throw new ConflictException(
+          'La operación entra en conflicto con registros relacionados.',
+        );
+      }
+
+      if (error.code === 'P2025' && id !== undefined) {
+        throw new NotFoundException(`No existe un producto con id ${id}.`);
+      }
+    }
+
+    throw error;
   }
 }
