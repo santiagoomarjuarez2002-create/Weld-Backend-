@@ -19,19 +19,12 @@ export class CreateProductoDto {
 
   @IsString({ message: 'La descripción debe ser un texto' })
   @IsNotEmpty({ message: 'La descripción no puede estar vacía' })
-  @MinLength(15, {
-    message: 'La descripción debe tener al menos 15 caracteres',
-  })
-  @MaxLength(255, {
-    message: 'La descripción no puede exceder los 255 caracteres',
-  })
+  @MinLength(15, {message: 'La descripción debe tener al menos 15 caracteres'})
+  @MaxLength(255, {message: 'La descripción no puede exceder los 255 caracteres'})
   descripcion: string;
 
   @IsDefined({ message: 'El precio es obligatorio' })
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: 'El precio debe ser un número con hasta 2 decimales' },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 },{ message: 'El precio debe ser un número con hasta 2 decimales' })
   @IsPositive({ message: 'El precio debe ser mayor que cero' })
   precio: number;
 
