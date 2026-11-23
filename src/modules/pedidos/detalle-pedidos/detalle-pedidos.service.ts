@@ -36,9 +36,6 @@ export class DetallePedidosService {
   }
 
   async create(createDetallePedidoDto: CreateDetallePedidoDto) {
-    const { producto_id, talle, cantidad } = createDetallePedidoDto;
-    await this.validateStock(producto_id, talle, cantidad);
-
     try {
       return await this.prisma.detalles_pedido.create({
         data: createDetallePedidoDto,
@@ -50,9 +47,6 @@ export class DetallePedidosService {
 
   async replace(id: number, replaceDetallePedidoDto: CreateDetallePedidoDto) {
     await this.findOne(id);
-    const { producto_id, talle, cantidad } = replaceDetallePedidoDto;
-    await this.validateStock(producto_id, talle, cantidad);
-
     try {
       return await this.prisma.detalles_pedido.update({
         where: { id },
@@ -64,20 +58,7 @@ export class DetallePedidosService {
   }
 
   async update(id: number, updateDetallePedidoDto: UpdateDetallePedidoDto) {
-    const detalle = await this.findOne(id);
-    const { producto_id, talle, cantidad } = updateDetallePedidoDto;
-    if (
-      producto_id !== undefined ||
-      talle !== undefined ||
-      cantidad !== undefined
-    ) {
-      await this.validateStock(
-        producto_id ?? detalle.producto_id,
-        talle ?? detalle.talle,
-        cantidad ?? detalle.cantidad,
-      );
-    }
-
+    await this.findOne(id);
     try {
       return await this.prisma.detalles_pedido.update({
         where: { id },
@@ -94,41 +75,6 @@ export class DetallePedidosService {
       return await this.prisma.detalles_pedido.delete({ where: { id } });
     } catch (error) {
       this.handleWriteError(error, id);
-    }
-  }
-
-  private async validateStock(
-    productoId: number,
-    talle: string,
-    cantidad: number,
-  ) {
-    const producto = await this.prisma.productos.findUnique({
-      where: { id: productoId },
-      select: { stock_s: true, stock_m: true, stock_l: true, stock_xl: true },
-    });
-
-    if (!producto) {
-      throw new NotFoundException(
-        `No existe un producto con id ${productoId}.`,
-      );
-    }
-
-    const stockPorTalle: Record<string, number | undefined> = {
-      S: producto.stock_s,
-      M: producto.stock_m,
-      L: producto.stock_l,
-      XL: producto.stock_xl,
-    };
-    const stock = stockPorTalle[talle];
-
-    if (typeof stock !== 'number') {
-      throw new BadRequestException('El talle debe ser S, M, L o XL.');
-    }
-
-    if (cantidad > stock) {
-      throw new ConflictException(
-        `No hay stock suficiente para el talle ${talle}.`,
-      );
     }
   }
 
