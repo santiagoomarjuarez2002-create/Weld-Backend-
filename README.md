@@ -30,7 +30,7 @@ npx prisma migrate deploy --config prisma7.config.ts
 npm run start:dev
 ```
 
-El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3000`; se puede cambiar el puerto definiendo `PORT` en el entorno.
+El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3001`; se puede cambiar el puerto definiendo `PORT` en el entorno.
 
 En PowerShell, por ejemplo:
 
@@ -50,7 +50,7 @@ npm run start:dev
 
 ## Endpoints
 
-Base URL local: `http://localhost:3000`
+Base URL local: `http://localhost:3001`
 
 | Recurso | Rutas |
 | --- | --- |
@@ -66,7 +66,7 @@ Usuarios, productos, pedidos y detalles de pedido ofrecen las operaciones CRUD:
 | --- | --- | --- |
 | GET | `/recurso` | Listar |
 | GET | `/recurso/:id` | Consultar por ID |
-| POST | `/recurso` | Crear |
+| POST | `/productos`, `/pedidos`, `/detalle-pedidos` | Crear |
 | PUT | `/recurso/:id` | Reemplazar con un cuerpo completo |
 | PATCH | `/recurso/:id` | Actualizar campos enviados |
 | DELETE | `/recurso/:id` | Eliminar |
@@ -79,8 +79,7 @@ Enviar los cuerpos como JSON (`Content-Type: application/json`). Las rutas CRUD 
 
 ### Registrar usuario
 
-`POST /auth/register`  
-`POST /usuarios` acepta el mismo cuerpo.
+`POST /auth/register`
 
 ```json
 {
@@ -159,6 +158,19 @@ El nombre debe tener entre 3 y 150 caracteres; la descripción, entre 15 y 255. 
 
 Los IDs y la cantidad deben ser enteros positivos, el talle debe ser `S`, `M`, `L` o `XL`, y el precio unitario debe ser positivo con hasta dos decimales.
 
+El servicio guarda el detalle sin consultar ni descontar stock.
+
+## Validaciones y respuestas HTTP
+
+El `ValidationPipe` global valida los DTO antes de ejecutar el servicio. Los servicios manejan registros inexistentes y errores de escritura de Prisma.
+
+| Código | Ejemplo |
+| --- | --- |
+| **400 Bad Request** | «Falta completar los datos obligatorios.» si falta un campo requerido. Si el formato es inválido, se devuelve el mensaje de validación correspondiente. |
+| **401 Unauthorized** | «Correo o contraseña incorrectos.» si las credenciales del login son incorrectas. |
+| **404 Not Found** | El usuario, producto, pedido o detalle solicitado no existe. |
+| **409 Conflict** | El correo ya está registrado o la operación entra en conflicto con registros relacionados. |
+
 ## Comandos
 
 | Comando | Uso |
@@ -197,6 +209,12 @@ prisma/
 |-- schema.prisma
 `-- migrations/
 ```
+## Trabajo con ramas
+
+- `main` para la versión estable.
+- `dev` para integrar cambios.
+- `feature/nombre-funcionalidad`, `fix/nombre-correccion`, `refactor/nombre-cambio` y `docs/nombre-documentacion` para preparar cambios.
+
 ## Integrantes
 
 - Joaquin Bernardo
