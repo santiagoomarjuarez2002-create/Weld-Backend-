@@ -1,174 +1,114 @@
-# Weld Backend
+﻿# Weld Backend
 
-API REST de Weld desarrollada con NestJS y TypeScript. Incluye Usuarios, Productos, Pedidos y Auth, y las validaciones del **TP 10: DTO y validación de datos en NestJS**.
-
-## Estado del proyecto
-
-- Usuarios, Productos y Pedidos tienen DTOs propios de creación con validaciones y mensajes en español.
-- Los DTOs de actualización heredan las reglas mediante `PartialType`, con campos opcionales.
-- `main.ts` registra un `ValidationPipe` global.
-- Los servicios devuelven mensajes cortos, como “Esto crea un usuario”. Todavía no guardan, consultan ni eliminan datos reales.
-- Auth conserva las rutas de prueba y DTOs vacíos. Sus campos, validaciones y autenticación se trabajarán con la profesora.
-- Se realizaron pruebas en Postman con solicitudes válidas e inválidas.
+API REST de Weld desarrollada con NestJS, TypeScript, Prisma y PostgreSQL. Incluye registro e inicio de sesión, gestión de usuarios, productos, pedidos y detalles de pedido.
 
 ## Instalación y ejecución
 
-Requisitos: Node.js compatible con las dependencias y npm.
+Necesitás Node.js, npm y una base de datos PostgreSQL. Desde la carpeta `Weld-Backend-`, ejecutá `npm install` y creá un archivo `.env` con los datos de tu entorno:
 
-Desde la carpeta `Weld-Backend-`, donde está `package.json`:
+```dotenv
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/weld
+JWT_SECRET=reemplazar_por_una_clave_secreta
+PORT=3001
+```
+
+Aplicá las migraciones a la base configurada e iniciá el servidor:
 
 ```bash
-npm install
+npx prisma migrate deploy --config prisma7.config.ts
 npm run start:dev
 ```
 
-La aplicación escucha en **http://localhost:3000** por defecto. Usa `process.env.PORT` si esa variable está definida en el proceso.
-
-Actualmente no se carga automáticamente un archivo `.env`. Para cambiar el puerto desde PowerShell:
-
-```powershell
-$env:PORT = '4001'
-npm run start:dev
-```
-
-Las variables `VITE_API_*` son direcciones que puede utilizar el frontend; no configuran el puerto del backend. Postman tampoco las importa automáticamente desde el `.env`.
-
-## Estructura principal
-
-```text
-src/
-|-- main.ts
-`-- modules/
-    |-- App/
-    |-- auth/
-    |-- pedidos/
-    |-- productos/
-    |-- usuarios/
-    `-- ejercicios.ts
-```
-
-Cada recurso tiene su controlador, servicio, módulo, carpeta `dto` y carpeta `entities`. No hay prefijo global en las rutas.
+La API escucha en `http://localhost:3001` por defecto. `GET /` devuelve `Hola Programacion`.
 
 ## Endpoints
 
-| Módulo | URL base |
+| Recurso | Rutas |
 | --- | --- |
-| Usuarios | `http://localhost:3000/usuarios` |
-| Productos | `http://localhost:3000/productos` |
-| Pedidos | `http://localhost:3000/pedidos` |
-| Auth | `http://localhost:3000/auth` |
+| Auth | `POST /auth/register`, `POST /auth/login` |
+| Usuarios | `GET /usuarios`, `GET /usuarios/:id`, `PUT /usuarios/:id`, `PATCH /usuarios/:id`, `DELETE /usuarios/:id` |
+| Productos | `GET /productos`, `GET /productos/:id`, `POST /productos`, `PUT /productos/:id`, `PATCH /productos/:id`, `DELETE /productos/:id` |
+| Pedidos | `GET /pedidos`, `GET /pedidos/:id`, `POST /pedidos`, `PUT /pedidos/:id`, `PATCH /pedidos/:id`, `DELETE /pedidos/:id` |
+| Detalles de pedido | `GET /detalle-pedidos`, `GET /detalle-pedidos/:id`, `POST /detalle-pedidos`, `PUT /detalle-pedidos/:id`, `PATCH /detalle-pedidos/:id`, `DELETE /detalle-pedidos/:id` |
 
-Todos tienen las siguientes rutas. Reemplazar `recurso` por `usuarios`, `productos`, `pedidos` o `auth`:
+El registro crea el usuario, guarda la contraseña con bcrypt y excluye el hash de la respuesta. El login verifica las credenciales y devuelve un `access_token` JWT con una duración de una hora. Las rutas CRUD están disponibles sin token en la versión actual.
 
-| Método | Ruta | Operación | Ejemplo de respuesta en Usuarios |
-| --- | --- | --- | --- |
-| GET | `/recurso` | findAll | Esto muestra los usuarios |
-| GET | `/recurso/1` | findOne | Esto muestra un usuario |
-| POST | `/recurso` | create | Esto crea un usuario |
-| PUT | `/recurso/1` | replace | Esto reemplaza un usuario |
-| PATCH | `/recurso/1` | update | Esto actualiza parcialmente un usuario |
-| DELETE | `/recurso/1` | remove | Esto elimina un usuario |
+## Ejemplos para probar en Postman
 
-El ID `1` es un ejemplo. Las rutas actuales no verifican su existencia en una base de datos. Auth también devuelve únicamente mensajes; no implementa login.
+Usá **Body → raw → JSON** para `POST`, `PUT` y `PATCH`. Enviá todos los campos obligatorios en `PUT`. En `PATCH` podés enviar solo los campos a modificar, por ejemplo `{"precio": 150.75}` a `/productos/1`.
 
-`GET /` devuelve `Hola Programacion`.
+### Registro y login
 
-## Probar en Postman
-
-Elegir el método y pegar la URL completa. GET y DELETE no necesitan Body.
-
-Para **POST y PUT**, seleccionar **Body → raw → JSON** y enviar todos los campos obligatorios del recurso. PUT requiere un ID al final de la URL, por ejemplo `http://localhost:3000/usuarios/1`.
-
-### Usuarios
-
-POST: `http://localhost:3000/usuarios`
-
-PUT: `http://localhost:3000/usuarios/1`
+`POST /auth/register`
 
 ```json
 {
   "nombre": "Joaquin",
+  "apellido": "Bernardo",
+  "telefono": "1123456789",
+  "dni": "12345678",
+  "provincia": "Buenos Aires",
+  "localidad": "La Plata",
+  "direccion": "Calle 10 123",
   "email": "joaquin@example.com",
   "password": "Clave123!"
 }
 ```
 
-Validaciones: nombre de 3 a 100 caracteres, email válido de hasta 254 caracteres y contraseña de 8 a 128 caracteres con minúscula, mayúscula, número y símbolo. `direccion` es opcional y debe tener entre 5 y 255 caracteres.
+Para `POST /auth/login`, enviá el mismo `email` y `password`. El `PATCH /usuarios/:id` usa un DTO de actualización de perfil.
 
 ### Productos
 
-POST: `http://localhost:3000/productos`
-
-PUT: `http://localhost:3000/productos/1`
+`POST /productos`
 
 ```json
 {
-  "nombre": "Soldadora",
-  "descripcion": "Soldadora para uso industrial",
+  "nombre": "Remera Weld",
+  "descripcion": "Remera de algodón de manga corta",
   "precio": 125.50,
-  "fecha": "2020-01-01T00:00:00.000Z"
+  "stock_s": 5,
+  "stock_m": 8,
+  "stock_l": 4,
+  "stock_xl": 0
 }
 ```
 
-Validaciones: nombre de 3 a 100 caracteres, descripción de 15 a 255, precio numérico positivo con hasta 2 decimales y fecha válida que no sea futura. La fecha se convierte mediante `@Type(() => Date)`.
+### Pedidos y detalles
 
-### Pedidos
-
-POST: `http://localhost:3000/pedidos`
-
-PUT: `http://localhost:3000/pedidos/1`
+`POST /pedidos`
 
 ```json
 {
-  "usuarioId": 1,
-  "productosIds": [1, 2],
-  "fecha": "2020-01-01T00:00:00.000Z"
+  "usuario_id": 1,
+  "direccion_envio": "Calle 10 123",
+  "costo_envio": 50.00
 }
 ```
 
-Validaciones: `usuarioId` entero positivo, `productosIds` como arreglo no vacío de enteros positivos sin duplicados y fecha válida que no sea futura. `observaciones` es opcional, de tipo texto y con hasta 500 caracteres.
-
-### PATCH y Auth
-
-PATCH permite enviar campos parciales en **Body → raw → JSON**. Por ejemplo, para `PATCH http://localhost:3000/productos/1`:
+`POST /detalle-pedidos`
 
 ```json
 {
-  "precio": 150.75
+  "pedido_id": 1,
+  "producto_id": 1,
+  "cantidad": 2,
+  "talle": "M",
+  "precio_unitario": 125.50
 }
 ```
 
-Para las rutas POST, PUT y PATCH de Auth, enviar `{}` mientras sus DTOs estén vacíos.
+Reemplazá los IDs de los ejemplos por los que devuelve la API al crear cada registro. El DTO del detalle valida que la cantidad sea un entero positivo y que el talle sea `S`, `M`, `L` o `XL`. El servicio guarda el detalle sin consultar ni descontar stock.
 
-### Comprobar los errores de validación
+## Validaciones y respuestas HTTP
 
-1. Enviar un POST con el cuerpo válido del recurso: debe responder **201 Created** y el mensaje correspondiente.
-2. Cambiar un solo dato y volver a enviar.
-3. Comprobar la respuesta **400 Bad Request** y los errores del arreglo `message`.
-4. Corregir el dato y comprobar que vuelve a responder **201**.
+El `ValidationPipe` global valida los DTO antes de ejecutar el servicio. Los servicios manejan registros inexistentes y errores de escritura de Prisma.
 
-Ejemplos de errores:
-
-| Recurso | Cambio | Validación |
-| --- | --- | --- |
-| Usuarios | Omitir `email` | Correo obligatorio y válido |
-| Usuarios | Enviar `"password": "123"` | Contraseña fuerte |
-| Productos | Omitir `precio` | Precio obligatorio |
-| Productos | Enviar `"precio": "hola"` | Tipo numérico |
-| Productos | Enviar `"precio": -10` | Precio positivo |
-| Pedidos | Enviar `"usuarioId": "hola"` | Entero positivo |
-| Pedidos | Enviar `"productosIds": []` | Arreglo no vacío |
-| Pedidos | Enviar `"productosIds": [1, 1]` | Identificadores únicos |
-
-Puede aparecer más de un mensaje por campo inválido. Los DTOs actuales no contienen un campo `estado`; la validación de booleanos es un ejemplo de la consigna.
-
-Las solicitudes válidas GET, PUT, PATCH y DELETE responden **200 OK**.
-
-### Colección lista para importar
-
-En Postman, seleccionar **Import** y abrir [Weld.postman_collection.json](./Weld.postman_collection.json).
-
-Incluye las 24 solicitudes de los cuatro módulos, cuerpos de ejemplo y comprobaciones de estado y mensaje. Utiliza `baseUrl=http://localhost:3000` e `id=1` como variables de colección.
+| Código | Ejemplo |
+| --- | --- |
+| **400 Bad Request** | «Falta completar los datos obligatorios.» si falta un campo requerido. Si el formato es inválido, se devuelve el mensaje de validación correspondiente. |
+| **401 Unauthorized** | «Correo o contraseña incorrectos.» si las credenciales del login son incorrectas. |
+| **404 Not Found** | El usuario, producto, pedido o detalle solicitado no existe. |
+| **409 Conflict** | El correo ya está registrado o la operación entra en conflicto con registros relacionados. |
 
 ## Comandos
 
@@ -183,16 +123,13 @@ Incluye las 24 solicitudes de los cuatro módulos, cuerpos de ejemplo y comproba
 
 ## Trabajo con ramas
 
-- `main`: versión estable.
-- `dev`: integración.
-- `feature/nombre-funcionalidad`: funcionalidades.
-- `fix/nombre-correccion`: correcciones.
-- `refactor/nombre-cambio`: reorganización.
-- `docs/nombre-documentacion`: documentación.
+- `main` para la versión estable.
+- `dev` para integrar cambios.
+- `feature/nombre-funcionalidad`, `fix/nombre-correccion`, `refactor/nombre-cambio` y `docs/nombre-documentacion` para preparar cambios.
 
 ## Integrantes
 
-Joaquin Bernardo
-Santiago Juarez
-Santiago Acosta
-Leonel Ferrari
+- Joaquin Bernardo
+- Santiago Juarez
+- Santiago Acosta
+- Leonel Ferrari
