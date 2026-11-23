@@ -1,89 +1,148 @@
-﻿# Weld Backend
+# Weld Backend
 
-API REST de Weld desarrollada con NestJS, TypeScript, Prisma y PostgreSQL. Incluye registro e inicio de sesión, gestión de usuarios, productos, pedidos y detalles de pedido.
+API REST para Weld, construida con NestJS, TypeScript, Prisma 7 y PostgreSQL. Actualmente incluye gestión de usuarios, productos, pedidos y detalles de pedido, además de registro e inicio de sesión con JWT. La versión declarada en `package.json` es `0.0.1`.
 
-## Instalación y ejecución
+## Requisitos
 
-Necesitás Node.js, npm y una base de datos PostgreSQL. Desde la carpeta `Weld-Backend-`, ejecutá `npm install` y creá un archivo `.env` con los datos de tu entorno:
+- Node.js y npm.
+- PostgreSQL y una base de datos creada para el proyecto.
+- Las variables de entorno `DATABASE_URL` y `JWT_SECRET`.
 
-```dotenv
-DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/weld
-JWT_SECRET=reemplazar_por_una_clave_secreta
-PORT=3001
+## Configuración y ejecución
+
+Desde la carpeta que contiene `package.json`:
+
+```bash
+npm install
 ```
 
-Aplicá las migraciones a la base configurada e iniciá el servidor:
+Configurar las variables en un archivo `.env` en esa carpeta:
+
+```env
+DATABASE_URL="postgresql://USUARIO:CONTRASENA@localhost:5432/weld?schema=public"
+JWT_SECRET="reemplazar-por-un-secreto-seguro"
+```
+
+Aplicar las migraciones existentes y ejecutar la API:
 
 ```bash
 npx prisma migrate deploy --config prisma7.config.ts
 npm run start:dev
 ```
 
-La API escucha en `http://localhost:3001` por defecto. `GET /` devuelve `Hola Programacion`.
+El cliente de Prisma se genera durante la instalación y antes de iniciar en modo desarrollo o compilar. La aplicación escucha en `http://localhost:3001`; se puede cambiar el puerto definiendo `PORT` en el entorno.
+
+En PowerShell, por ejemplo:
+
+```powershell
+$env:PORT = '4001'
+npm run start:dev
+```
+
+## Persistencia y validación
+
+- Prisma conecta a PostgreSQL mediante `DATABASE_URL`. La aplicación requiere esta variable y `JWT_SECRET` para iniciar.
+- El esquema define `usuarios`, `productos`, `pedidos` y `detalles_pedido`; los pedidos se relacionan con usuarios y sus detalles con productos.
+- Las contraseñas se guardan como hash y no se incluyen en las respuestas de usuarios.
+- `main.ts` registra un `ValidationPipe` global. Los DTOs de creación validan los campos y los DTOs de actualización permiten campos parciales.
+- Los IDs de ruta se validan como enteros. Las operaciones sobre registros inexistentes responden con error 404; el email duplicado y la eliminación de usuarios con pedidos relacionados responden con error 409.
+- El login emite un JWT con vigencia de una hora. En el estado actual no hay guards que exijan el token para acceder a las rutas de gestión.
 
 ## Endpoints
 
+Base URL local: `http://localhost:3001`
+
 | Recurso | Rutas |
 | --- | --- |
-| Auth | `POST /auth/register`, `POST /auth/login` |
-| Usuarios | `GET /usuarios`, `GET /usuarios/:id`, `PUT /usuarios/:id`, `PATCH /usuarios/:id`, `DELETE /usuarios/:id` |
-| Productos | `GET /productos`, `GET /productos/:id`, `POST /productos`, `PUT /productos/:id`, `PATCH /productos/:id`, `DELETE /productos/:id` |
-| Pedidos | `GET /pedidos`, `GET /pedidos/:id`, `POST /pedidos`, `PUT /pedidos/:id`, `PATCH /pedidos/:id`, `DELETE /pedidos/:id` |
-| Detalles de pedido | `GET /detalle-pedidos`, `GET /detalle-pedidos/:id`, `POST /detalle-pedidos`, `PUT /detalle-pedidos/:id`, `PATCH /detalle-pedidos/:id`, `DELETE /detalle-pedidos/:id` |
+| Usuarios | `/usuarios` |
+| Productos | `/productos` |
+| Pedidos | `/pedidos` |
+| Detalles de pedido | `/detalle-pedidos` |
+| Autenticación | `/auth/register`, `/auth/login` |
 
-El registro crea el usuario, guarda la contraseña con bcrypt y excluye el hash de la respuesta. El login verifica las credenciales y devuelve un `access_token` JWT con una duración de una hora. Las rutas CRUD están disponibles sin token en la versión actual.
+Usuarios, productos, pedidos y detalles de pedido ofrecen las operaciones CRUD:
 
-## Ejemplos para probar en Postman
+| Método | Ruta | Operación |
+| --- | --- | --- |
+| GET | `/recurso` | Listar |
+| GET | `/recurso/:id` | Consultar por ID |
+| POST | `/productos`, `/pedidos`, `/detalle-pedidos` | Crear |
+| PUT | `/recurso/:id` | Reemplazar con un cuerpo completo |
+| PATCH | `/recurso/:id` | Actualizar campos enviados |
+| DELETE | `/recurso/:id` | Eliminar |
 
-Usá **Body → raw → JSON** para `POST`, `PUT` y `PATCH`. Enviá todos los campos obligatorios en `PUT`. En `PATCH` podés enviar solo los campos a modificar, por ejemplo `{"precio": 150.75}` a `/productos/1`.
+`GET /` responde `Hola Programacion`. Las respuestas de CRUD contienen los registros de la base de datos. El registro responde con los datos del usuario creado, sin su hash de contraseña; el login responde con `access_token` y los datos públicos del usuario.
 
-### Registro y login
+## Ejemplos de solicitudes
+
+Enviar los cuerpos como JSON (`Content-Type: application/json`). Las rutas CRUD con `:id` esperan el ID numérico del registro.
+
+### Registrar usuario
 
 `POST /auth/register`
 
 ```json
 {
   "nombre": "Joaquin",
-  "apellido": "Bernardo",
-  "telefono": "1123456789",
+  "apellido": "Perez",
+  "telefono": "1122334455",
   "dni": "12345678",
   "provincia": "Buenos Aires",
   "localidad": "La Plata",
-  "direccion": "Calle 10 123",
+  "direccion": "Calle 123",
   "email": "joaquin@example.com",
   "password": "Clave123!"
 }
 ```
 
-Para `POST /auth/login`, enviá el mismo `email` y `password`. El `PATCH /usuarios/:id` usa un DTO de actualización de perfil.
+Los campos son obligatorios. El email debe ser válido y tener hasta 254 caracteres; la contraseña debe tener entre 8 y 128 caracteres, con al menos una minúscula, una mayúscula, un número y un símbolo. Los demás campos son texto y deben respetar los máximos definidos por el esquema: nombre, apellido, provincia y localidad 100 caracteres; teléfono 15; DNI 10; dirección 100.
 
-### Productos
+### Iniciar sesión
+
+`POST /auth/login`
+
+```json
+{
+  "email": "joaquin@example.com",
+  "password": "Clave123!"
+}
+```
+
+Si las credenciales son válidas, la respuesta incluye un JWT con vencimiento de una hora. Las credenciales incorrectas responden `401 Unauthorized`.
+
+### Crear producto
 
 `POST /productos`
 
 ```json
 {
   "nombre": "Remera Weld",
-  "descripcion": "Remera de algodón de manga corta",
-  "precio": 125.50,
-  "stock_s": 5,
-  "stock_m": 8,
-  "stock_l": 4,
-  "stock_xl": 0
+  "descripcion": "Remera de algodón para uso diario",
+  "precio": 12500.5,
+  "stock_s": 10,
+  "stock_m": 12,
+  "stock_l": 8,
+  "stock_xl": 4
 }
 ```
 
-### Pedidos y detalles
+El nombre debe tener entre 3 y 150 caracteres; la descripción, entre 15 y 255. El precio debe ser positivo y tener hasta dos decimales. Los cuatro stocks son enteros no negativos.
+
+### Crear pedido
 
 `POST /pedidos`
 
 ```json
 {
   "usuario_id": 1,
-  "direccion_envio": "Calle 10 123",
-  "costo_envio": 50.00
+  "direccion_envio": "Calle 123, La Plata",
+  "costo_envio": 1500
 }
 ```
+
+`usuario_id` debe ser un entero positivo correspondiente a un usuario existente. La dirección es obligatoria y admite hasta 255 caracteres; el costo de envío debe ser un número no negativo con hasta dos decimales.
+
+### Crear detalle de pedido
 
 `POST /detalle-pedidos`
 
@@ -93,11 +152,13 @@ Para `POST /auth/login`, enviá el mismo `email` y `password`. El `PATCH /usuari
   "producto_id": 1,
   "cantidad": 2,
   "talle": "M",
-  "precio_unitario": 125.50
+  "precio_unitario": 12500.5
 }
 ```
 
-Reemplazá los IDs de los ejemplos por los que devuelve la API al crear cada registro. El DTO del detalle valida que la cantidad sea un entero positivo y que el talle sea `S`, `M`, `L` o `XL`. El servicio guarda el detalle sin consultar ni descontar stock.
+Los IDs y la cantidad deben ser enteros positivos, el talle debe ser `S`, `M`, `L` o `XL`, y el precio unitario debe ser positivo con hasta dos decimales.
+
+El servicio guarda el detalle sin consultar ni descontar stock.
 
 ## Validaciones y respuestas HTTP
 
@@ -114,13 +175,40 @@ El `ValidationPipe` global valida los DTO antes de ejecutar el servicio. Los ser
 
 | Comando | Uso |
 | --- | --- |
-| `npm run start:dev` | Ejecutar en desarrollo |
-| `npm start` | Iniciar con Nest CLI |
-| `npm run build` | Compilar |
+| `npm run start:dev` | Ejecutar en desarrollo con recarga |
+| `npm start` | Ejecutar con Nest CLI |
+| `npm run start:prod` | Ejecutar desde `dist` |
+| `npm run build` | Generar el cliente Prisma y compilar |
+| `npm run prisma:generate` | Generar el cliente Prisma |
 | `npm run lint` | Analizar el código |
-| `npm test` | Ejecutar pruebas con Vitest |
-| `npm run test:e2e` | Ejecutar pruebas de extremo a extremo |
+| `npm test` | Ejecutar pruebas unitarias con Vitest |
+| `npm run test:e2e` | Ejecutar pruebas e2e con Vitest |
+| `npm run test:cov` | Ejecutar pruebas con cobertura |
 
+
+
+## Colección de Postman
+
+El archivo `Weld.postman_collection.json` todavía contiene solicitudes y respuestas de una versión anterior basada en mensajes de prueba. No está sincronizado con los DTOs, la persistencia ni las rutas de autenticación actuales; verificar o actualizar sus ejemplos antes de usarla para probar esta versión.
+
+## Estructura principal
+
+```text
+src/
+|-- main.ts
+|-- prisma/
+|-- modules/
+|   |-- App/
+|   |-- auth/
+|   |-- pedidos/
+|   |   `-- detalle-pedidos/
+|   |-- productos/
+|   `-- usuarios/
+`-- generated/prisma/
+prisma/
+|-- schema.prisma
+`-- migrations/
+```
 ## Trabajo con ramas
 
 - `main` para la versión estable.
